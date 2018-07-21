@@ -1,13 +1,27 @@
 webpackJsonp(["polyfills"],{
 
-"./node_modules/classlist.js/classList.js":
-(function(module, exports) {
+/***/ "./node_modules/classlist.js/classList.js":
+/***/ (function(module, exports) {
+
+/*
+ * classList.js: Cross-browser full element.classList implementation.
+ * 1.1.20150312
+ *
+ * By Eli Grey, http://eligrey.com
+ * License: Dedicated to the public domain.
+ *   See https://github.com/eligrey/classList.js/blob/master/LICENSE.md
+ */
+
+/*global self, document, DOMException */
+
+/*! @source http://purl.eligrey.com/github/classList.js/blob/master/classList.js */
 
 if ("document" in self) {
 
 // Full polyfill for browsers with no classList support
 // Including IE < Edge missing SVGElement.classList
-if (!("classList" in document.createElement("_")) || document.createElementNS && !("classList" in document.createElementNS("http://www.w3.org/2000/svg","g"))) {
+if (!("classList" in document.createElement("_")) 
+	|| document.createElementNS && !("classList" in document.createElementNS("http://www.w3.org/2000/svg","g"))) {
 
 (function (view) {
 
