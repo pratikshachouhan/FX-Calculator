@@ -1,20 +1,7 @@
 webpackJsonp(["polyfills"],{
 
-/***/ "./node_modules/classlist.js/classList.js":
-/***/ (function(module, exports) {
-
-/*
- * classList.js: Cross-browser full element.classList implementation.
- * 1.1.20150312
- *
- * By Eli Grey, http://eligrey.com
- * License: Dedicated to the public domain.
- *   See https://github.com/eligrey/classList.js/blob/master/LICENSE.md
- */
-
-/*global self, document, DOMException */
-
-/*! @source http://purl.eligrey.com/github/classList.js/blob/master/classList.js */
+"./node_modules/classlist.js/classList.js":
+(function(module, exports) {
 
 if ("document" in self) {
 
