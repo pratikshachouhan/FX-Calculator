@@ -20,7 +20,7 @@ webpackEmptyAsyncContext.id = "./src/$$_lazy_route_resource lazy recursive";
 /***/ "./src/app/app.component.html":
 /***/ (function(module, exports) {
 
-module.exports = "<app-fx-calc></app-fx-calc>"
+module.exports = "<div class=\"container\">\n  <div class=\"row\">\n    <div class=\"col-sm-12 col-md-12 col-lg-12 text-center\">\n      <h1>{{title}}</h1>\n    </div>\n  </div>\n  <div class=\"row d-flex justify-content-center align-items-center\">\n    <div class=\"col-xs-8 col-md-4 col-lg-4\">\n      <p>\n        <select [(ngModel)]=\"fromCode\" (change)=\"getFXRate()\" [compareWith]=\"compareFn\">\n          <option [ngValue]=\"selected\" disabled >From Country</option>\n          <option *ngFor=\"let from of countries\" [ngValue]=\"from.currencies[0].code == null ? from.currencies[1] : from.currencies[0]\">{{from.name}}</option>\n        </select>\n      </p>\n      <div class=\"form-input\">\n        <label>Send</label>\n        <div class=\"input-group\">\n            <input type=\"number\" [(ngModel)] = \"send\" (keyup)=\"convertCurrency(1)\" placeholder=\"Amount\" class=\"form-control\">\n            <div class=\"input-group-append\">\n                <div class=\"d-inline-flex p-2\">{{ fromCode.symbol ? fromCode.symbol : fromCode.code }}</div>\n            </div>\n        </div>\n      </div>\n      </div>\n      <div class=\"col-lg-2 col-md-2 text-center img-control\">\n        <span><img src=\"../assets/images/twoWayArrow.png\" alt=\"Two Way Arrow\"/></span>\n      </div>\n    <div class=\"col-xs-8 col-md-4 col-lg-4\">\n      <p>\n        <select [(ngModel)]=\"toCode\" (change)=\"getFXRate()\" [compareWith]=\"compareFn\">\n          <option [ngValue]=\"selected\" disabled >To Country</option>\n          <option *ngFor=\"let to of countries\" [ngValue]=\"to.currencies[0].code == null ? to.currencies[1] : to.currencies[0]\">{{to.name}}</option>\n        </select>\n      </p>\n      <div class=\"form-input\">\n        <label>Receive</label>\n        <div class=\"input-group\">\n            <input type=\"number\"[(ngModel)] = \"receive\" (keyup)=\"convertCurrency(2)\" placeholder=\"Amount\" class=\"form-control\">\n            <div class=\"input-group-append\">\n                <div class=\"d-inline-flex p-2\">{{ toCode.symbol ? toCode.symbol : toCode.code }}</div>\n            </div>\n        </div>\n      </div>\n    </div>\n  </div>\n  <div class=\"row\">\n    <div class=\"col-sm-12 col-lg-12 col-md-12 d-inline-flex justify-content-center p-2\" *ngIf=\"rate\">\n        <span class=\"alert alert-dark\" role=\"alert\">\n            The FX Rate of 1 {{fromCode.code}} = {{rate | number : '1.2-4'}} {{toCode.code}}, 1 {{toCode.code}} = {{1/rate | number : '1.2-4'}} {{fromCode.code}}\n        </span>\n    </div>\n    <div class=\"col-sm-12 col-lg-12 col-md-12 d-inline-flex justify-content-center p-2\" *ngIf=\"fxError\">\n        <span class=\"alert alert-danger\" role=\"alert\">\n          FXRate not available. Please select a different country.\n        </span>\n    </div>\n  </div>\n</div>"
 
 /***/ }),
 
@@ -37,23 +37,94 @@ module.exports = ""
 "use strict";
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return AppComponent; });
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__angular_core__ = __webpack_require__("./node_modules/@angular/core/esm5/core.js");
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__data_service__ = __webpack_require__("./src/app/data.service.ts");
 var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
     var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
     if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
     else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
     return c > 3 && r && Object.defineProperty(target, key, r), r;
 };
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+
 
 var AppComponent = /** @class */ (function () {
-    function AppComponent() {
-        this.title = 'app';
+    function AppComponent(_dataService) {
+        this._dataService = _dataService;
+        this.title = "FX Calculator";
+        this.fromCode = {
+            code: "",
+            symbol: ""
+        };
+        this.toCode = {
+            code: "",
+            symbol: ""
+        };
+        this.selected = {
+            code: "",
+            symbol: ""
+        };
+        this.fxError = false;
     }
+    AppComponent.prototype.ngOnInit = function () {
+        this.getCountries();
+    };
+    //Call a service method to invoke API call to get the Countries List
+    AppComponent.prototype.getCountries = function () {
+        var _this = this;
+        this._dataService.getCountries().subscribe(function (data) { _this.countries = data; }, function (err) { return console.error(err); }, function () { return console.log('Done loading countries'); });
+    };
+    //Call a service method to invoke API call to get the FXRates
+    AppComponent.prototype.getFXRate = function () {
+        var _this = this;
+        if (this.fromCode && this.fromCode.code != "" && this.fromCode.code != null && this.toCode && this.toCode.code != "" && this.toCode.code != null) {
+            this._dataService.getFXRates(this.fromCode.code, this.toCode.code).subscribe(function (data) {
+                _this.fxRate = data;
+                if (_this.fxRate.result == 'error') {
+                    _this.fxError = true;
+                }
+                else {
+                    _this.fxError = false;
+                }
+                _this.rate = _this.fxRate.rate;
+                console.log(data);
+            }, function (err) { return console.error(err); }, function () {
+                _this.convertCurrency(3);
+            });
+        }
+    };
+    //Operator: 1 to convert send amount, 2 to convert receive amount & 3 for OnFXRate Change
+    AppComponent.prototype.convertCurrency = function (operator) {
+        //Check if the send, receive and fxRate are number
+        if (this.rate && !isNaN(this.rate) && this.rate != null) {
+            if (operator === 1 && this.send != null && !isNaN(this.send)) {
+                this.receive = this.send * this.rate;
+            }
+            else if (operator === 2 && this.receive != null && !isNaN(this.receive)) {
+                this.send = this.receive / this.rate;
+            }
+            else if (operator === 3) {
+                if (this.send != null && !isNaN(this.send)) {
+                    this.receive = this.send * this.rate;
+                }
+                else if (this.receive != null && !isNaN(this.receive)) {
+                    this.send = this.receive / this.rate;
+                }
+            }
+        }
+    };
+    //Method to compare Option values in Select
+    AppComponent.prototype.compareFn = function (a, b) {
+        return a && b && a.code === b.code;
+    };
     AppComponent = __decorate([
         Object(__WEBPACK_IMPORTED_MODULE_0__angular_core__["m" /* Component */])({
             selector: 'app-root',
             template: __webpack_require__("./src/app/app.component.html"),
             styles: [__webpack_require__("./src/app/app.component.scss")]
-        })
+        }),
+        __metadata("design:paramtypes", [__WEBPACK_IMPORTED_MODULE_1__data_service__["a" /* DataService */]])
     ], AppComponent);
     return AppComponent;
 }());
@@ -71,9 +142,8 @@ var AppComponent = /** @class */ (function () {
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__angular_core__ = __webpack_require__("./node_modules/@angular/core/esm5/core.js");
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__angular_forms__ = __webpack_require__("./node_modules/@angular/forms/esm5/forms.js");
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__app_component__ = __webpack_require__("./src/app/app.component.ts");
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__fx_calc_fx_calc_component__ = __webpack_require__("./src/app/fx-calc/fx-calc.component.ts");
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_5__angular_common_http__ = __webpack_require__("./node_modules/@angular/common/esm5/http.js");
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_6__data_service__ = __webpack_require__("./src/app/data.service.ts");
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__angular_common_http__ = __webpack_require__("./node_modules/@angular/common/esm5/http.js");
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_5__data_service__ = __webpack_require__("./src/app/data.service.ts");
 var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
     var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
     if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
@@ -86,22 +156,20 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 
 
 
-
 var AppModule = /** @class */ (function () {
     function AppModule() {
     }
     AppModule = __decorate([
         Object(__WEBPACK_IMPORTED_MODULE_1__angular_core__["E" /* NgModule */])({
             declarations: [
-                __WEBPACK_IMPORTED_MODULE_3__app_component__["a" /* AppComponent */],
-                __WEBPACK_IMPORTED_MODULE_4__fx_calc_fx_calc_component__["a" /* FxCalcComponent */]
+                __WEBPACK_IMPORTED_MODULE_3__app_component__["a" /* AppComponent */]
             ],
             imports: [
                 __WEBPACK_IMPORTED_MODULE_0__angular_platform_browser__["a" /* BrowserModule */],
                 __WEBPACK_IMPORTED_MODULE_2__angular_forms__["a" /* FormsModule */],
-                __WEBPACK_IMPORTED_MODULE_5__angular_common_http__["b" /* HttpClientModule */]
+                __WEBPACK_IMPORTED_MODULE_4__angular_common_http__["b" /* HttpClientModule */]
             ],
-            providers: [__WEBPACK_IMPORTED_MODULE_6__data_service__["a" /* DataService */]],
+            providers: [__WEBPACK_IMPORTED_MODULE_5__data_service__["a" /* DataService */]],
             bootstrap: [__WEBPACK_IMPORTED_MODULE_3__app_component__["a" /* AppComponent */]]
         })
     ], AppModule);
@@ -138,9 +206,11 @@ var DataService = /** @class */ (function () {
     function DataService(http) {
         this.http = http;
     }
+    //API Call to get list of Countries
     DataService.prototype.getCountries = function () {
         return this.http.get(API_URL);
     };
+    //API Call to get the FXRate
     DataService.prototype.getFXRates = function (from, to) {
         return this.http.get(FXRATES_API_URL + "/" + from + "/" + to);
     };
@@ -149,99 +219,6 @@ var DataService = /** @class */ (function () {
         __metadata("design:paramtypes", [__WEBPACK_IMPORTED_MODULE_1__angular_common_http__["a" /* HttpClient */]])
     ], DataService);
     return DataService;
-}());
-
-
-
-/***/ }),
-
-/***/ "./src/app/fx-calc/fx-calc.component.html":
-/***/ (function(module, exports) {
-
-module.exports = "<header>\n  <h1>{{title}}</h1>\n</header>\n<section class=\"container\">\n<div class=\"flex-element\">\n    <p>\n        <select [(ngModel)]=\"fromCode\" (change)=\"getFXRate()\">\n          <option value=\"\" disabled selected>From Country</option>\n          <option *ngFor=\"let from of countries\" [value]=\"from.currencies[0].code == null ? from.currencies[1].code : from.currencies[0].code\">{{from.name}}</option>\n        </select>\n    </p>\n    <div class=\"form-input\">\n        <label>Send</label>\n      <input type=\"number\" [(ngModel)] = \"send\" (keyup)=\"convertCurrency(1)\" placeholder=\"Amount\"/> <span>{{fromCode}}</span>\n    </div>\n</div>\n<div class=\"flex-element img-control\">\n    <p><img src=\"assets/images/twoWayArrow.png\" alt=\"Two Way Arrow\"/></p>\n</div>\n<div class=\"flex-element\">\n    <p>\n        <select [(ngModel)]=\"toCode\" (change)=\"getFXRate()\">\n          <option value=\"\" disabled selected>To Country</option>\n          <option *ngFor=\"let to of countries\" [value]=\"to.currencies[0].code == null ? to.currencies[1].code : to.currencies[0].code\">{{to.name}}</option>\n        </select>\n    </p>\n    <div class=\"form-input\">\n      <label>Receive</label>\n      <input type=\"number\" [(ngModel)] = \"receive\" (keyup)=\"convertCurrency(2)\" placeholder=\"Amount\"/> <span>{{toCode}}</span>\n    </div>\n</div>\n</section>\n<footer>\n<div class=\"info\" *ngIf=\"rate\">\n    <span>The FX Rate of 1 {{fromCode}} = {{rate | number : '1.2-4'}} {{toCode}}, 1 {{toCode}} = {{1/rate | number : '1.2-4'}} {{fromCode}}</span>\n</div>\n</footer>"
-
-/***/ }),
-
-/***/ "./src/app/fx-calc/fx-calc.component.scss":
-/***/ (function(module, exports) {
-
-module.exports = ""
-
-/***/ }),
-
-/***/ "./src/app/fx-calc/fx-calc.component.ts":
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return FxCalcComponent; });
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__angular_core__ = __webpack_require__("./node_modules/@angular/core/esm5/core.js");
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__data_service__ = __webpack_require__("./src/app/data.service.ts");
-var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
-    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
-    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
-    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
-    return c > 3 && r && Object.defineProperty(target, key, r), r;
-};
-var __metadata = (this && this.__metadata) || function (k, v) {
-    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
-};
-
-
-var FxCalcComponent = /** @class */ (function () {
-    function FxCalcComponent(_dataService) {
-        this._dataService = _dataService;
-        this.title = "FX Calculator";
-        this.fromCode = "";
-        this.toCode = "";
-    }
-    FxCalcComponent.prototype.ngOnInit = function () {
-        this.getCountries();
-    };
-    FxCalcComponent.prototype.getCountries = function () {
-        var _this = this;
-        this._dataService.getCountries().subscribe(function (data) { _this.countries = data; }, function (err) { return console.error(err); }, function () { return console.log('done loading countries'); });
-    };
-    FxCalcComponent.prototype.getFXRate = function () {
-        var _this = this;
-        if (this.fromCode != "" && this.fromCode != null && this.toCode != "" && this.toCode != null) {
-            this._dataService.getFXRates(this.fromCode, this.toCode).subscribe(function (data) {
-                _this.fxRate = data;
-                _this.rate = _this.fxRate.rate;
-                console.log(data);
-            }, function (err) { return console.error(err); }, function () {
-                _this.convertCurrency(3);
-            });
-        }
-    };
-    //Operator: 1 to convert send amount & 2 to convert receive amount
-    FxCalcComponent.prototype.convertCurrency = function (operator) {
-        //Check if the send, receive and fxRate are number
-        if (this.rate && !isNaN(this.rate) && this.rate != null) {
-            if (operator === 1 && this.send != null && !isNaN(this.send)) {
-                this.receive = this.send * this.rate;
-            }
-            else if (operator === 2 && this.receive != null && !isNaN(this.receive)) {
-                this.send = this.receive / this.rate;
-            }
-            else if (operator === 3) {
-                if (this.send != null && !isNaN(this.send)) {
-                    this.receive = this.send * this.rate;
-                }
-                else if (this.receive != null && !isNaN(this.receive)) {
-                    this.send = this.receive / this.rate;
-                }
-            }
-        }
-    };
-    FxCalcComponent = __decorate([
-        Object(__WEBPACK_IMPORTED_MODULE_0__angular_core__["m" /* Component */])({
-            selector: 'app-fx-calc',
-            template: __webpack_require__("./src/app/fx-calc/fx-calc.component.html"),
-            styles: [__webpack_require__("./src/app/fx-calc/fx-calc.component.scss")]
-        }),
-        __metadata("design:paramtypes", [__WEBPACK_IMPORTED_MODULE_1__data_service__["a" /* DataService */]])
-    ], FxCalcComponent);
-    return FxCalcComponent;
 }());
 
 
@@ -259,7 +236,7 @@ var FxCalcComponent = /** @class */ (function () {
 // The list of which env maps to which file can be found in `.angular-cli.json`.
 var environment = {
     production: false,
-    countryAPI: 'https://restcountries.eu/rest/v2/all',
+    countryAPI: 'https://restcountries.eu/rest/v2/all?fields=name;currencies',
     currencyAPI: 'https://v3.exchangerate-api.com/pair/61e57eba8437f0db8fa02b1c',
 };
 
