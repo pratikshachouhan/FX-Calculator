@@ -20,7 +20,7 @@ webpackEmptyAsyncContext.id = "./src/$$_lazy_route_resource lazy recursive";
 /***/ "./src/app/app.component.html":
 /***/ (function(module, exports) {
 
-module.exports = "<div class=\"container\">\n  <div class=\"row\">\n    <div class=\"col-sm-12 col-md-12 col-lg-12 text-center\">\n      <h1>{{title}}</h1>\n    </div>\n  </div>\n  <div class=\"row d-flex justify-content-center align-items-center\">\n    <div class=\"col-xs-8 col-md-4 col-lg-4\">\n      <p>\n        <select [(ngModel)]=\"fromCode\" (change)=\"getFXRate()\" [compareWith]=\"compareFn\">\n          <option [ngValue]=\"selected\" disabled >From Country</option>\n          <option *ngFor=\"let from of countries\" [ngValue]=\"from.currencies[0].code == null ? from.currencies[1] : from.currencies[0]\">{{from.name}}</option>\n        </select>\n      </p>\n      <div class=\"form-input\">\n        <label>Send</label>\n        <div class=\"input-group\">\n            <input type=\"number\" [(ngModel)] = \"send\" (keyup)=\"convertCurrency(1)\" placeholder=\"Amount\" class=\"form-control\">\n            <div class=\"input-group-append\">\n                <div class=\"d-inline-flex p-2\">{{ fromCode.symbol ? fromCode.symbol : fromCode.code }}</div>\n            </div>\n        </div>\n      </div>\n      </div>\n      <div class=\"col-lg-2 col-md-2 text-center img-control\">\n        <span><img src=\"assets/images/twoWayArrow.png\" alt=\"Two Way Arrow\"/></span>\n      </div>\n    <div class=\"col-xs-8 col-md-4 col-lg-4\">\n      <p>\n        <select [(ngModel)]=\"toCode\" (change)=\"getFXRate()\" [compareWith]=\"compareFn\">\n          <option [ngValue]=\"selected\" disabled >To Country</option>\n          <option *ngFor=\"let to of countries\" [ngValue]=\"to.currencies[0].code == null ? to.currencies[1] : to.currencies[0]\">{{to.name}}</option>\n        </select>\n      </p>\n      <div class=\"form-input\">\n        <label>Receive</label>\n        <div class=\"input-group\">\n            <input type=\"number\"[(ngModel)] = \"receive\" (keyup)=\"convertCurrency(2)\" placeholder=\"Amount\" class=\"form-control\">\n            <div class=\"input-group-append\">\n                <div class=\"d-inline-flex p-2\">{{ toCode.symbol ? toCode.symbol : toCode.code }}</div>\n            </div>\n        </div>\n      </div>\n    </div>\n  </div>\n  <div class=\"row\">\n    <div class=\"col-sm-12 col-lg-12 col-md-12 d-inline-flex justify-content-center p-2\" *ngIf=\"rate\">\n        <span class=\"alert alert-dark\" role=\"alert\">\n            The FX Rate of 1 {{fromCode.code}} = {{rate | number : '1.2-4'}} {{toCode.code}}, 1 {{toCode.code}} = {{1/rate | number : '1.2-4'}} {{fromCode.code}}\n        </span>\n    </div>\n    <div class=\"col-sm-12 col-lg-12 col-md-12 d-inline-flex justify-content-center p-2\" *ngIf=\"fxError\">\n        <span class=\"alert alert-danger\" role=\"alert\">\n          FXRate not available. Please select a different country.\n        </span>\n    </div>\n  </div>\n</div>"
+module.exports = "<div class=\"container\">\n  <div class=\"row\">\n    <div class=\"col-sm-12 col-md-12 col-lg-12 text-center\">\n      <h1>{{title}}</h1>\n    </div>\n  </div>\n  <div class=\"row d-flex justify-content-center\">\n    <div class=\"col-xs-8 col-md-4 col-lg-4\">\n      <p>\n        <select [(ngModel)]=\"fromCode\" (change)=\"getFXRate()\" [compareWith]=\"compareFn\">\n          <option [ngValue]=\"selected\" disabled >From Country</option>\n          <option *ngFor=\"let from of flatCountriesList\" [ngValue]=\"from.currencies\">{{from.name}}</option>\n        </select>\n      </p>\n      <div class=\"form-input\">\n        <label>Send</label>\n        <div class=\"input-group\">\n            <input type=\"number\" [(ngModel)] = \"send\" (keyup)=\"convertCurrency(1)\" placeholder=\"Amount\" class=\"form-control\">\n            <div class=\"input-group-append\">\n                <div class=\"d-inline-flex p-2\">{{ fromCode.symbol ? fromCode.symbol : fromCode.code }}</div>\n            </div>\n          </div>    \n      </div>\n      <div class=\"error\" *ngIf=\"sendErr\">{{sendErr}}</div>\n      <div class=\"info\" *ngIf=\"!sendErr\">Send upto 5000</div>\n    </div>\n    <div class=\"col-lg-2 col-md-2 img-control d-inline-flex align-items-center justify-content-center\">\n      <span><img src=\"assets/images/twoWayArrow.png\" alt=\"Two Way Arrow\"/></span>\n    </div>\n    <div class=\"col-xs-8 col-md-4 col-lg-4\">\n      <p>\n        <select [(ngModel)]=\"toCode\" (change)=\"getFXRate()\" [compareWith]=\"compareFn\">\n          <option [ngValue]=\"selected\" disabled >To Country</option>\n          <option *ngFor=\"let to of flatCountriesList\" [ngValue]=\"to.currencies\">{{to.name}}</option>\n        </select>\n      </p>\n      <div class=\"form-input\">\n        <label>Receive</label>\n        <div class=\"input-group\">\n            <input type=\"number\"[(ngModel)] = \"receive\" (keyup)=\"convertCurrency(2)\" placeholder=\"Amount\" class=\"form-control\">\n            <div class=\"input-group-append\">\n                <div class=\"d-inline-flex p-2\">{{ toCode.symbol ? toCode.symbol : toCode.code }}</div>\n            </div>\n        </div>\n      </div>\n    </div>\n  </div>\n  <div class=\"row\">\n    <div class=\"col-sm-12 col-lg-12 col-md-12 d-inline-flex justify-content-center p-2\" *ngIf=\"rate\">\n        <span class=\"alert alert-dark\" role=\"alert\">\n            The FX Rate of 1 {{fromCode.code}} = {{rate | number : '1.2-4'}} {{toCode.code}}, 1 {{toCode.code}} = {{1/rate | number : '1.2-4'}} {{fromCode.code}}\n        </span>\n    </div>\n    <div class=\"col-sm-12 col-lg-12 col-md-12 d-inline-flex justify-content-center p-2\" *ngIf=\"fxError\">\n        <span class=\"alert alert-danger\" role=\"alert\">\n          FXRate not available. Please select a different country.\n        </span>\n    </div>\n  </div>\n</div>"
 
 /***/ }),
 
@@ -66,6 +66,7 @@ var AppComponent = /** @class */ (function () {
             symbol: ""
         };
         this.fxError = false;
+        this.flatCountriesList = [];
     }
     AppComponent.prototype.ngOnInit = function () {
         this.getCountries();
@@ -73,7 +74,33 @@ var AppComponent = /** @class */ (function () {
     //Call a service method to invoke API call to get the Countries List
     AppComponent.prototype.getCountries = function () {
         var _this = this;
-        this._dataService.getCountries().subscribe(function (data) { _this.countries = data; }, function (err) { return console.error(err); }, function () { return console.log('Done loading countries'); });
+        this._dataService.getCountries().subscribe(function (data) { _this.countries = data; }, function (err) { return console.error(err); }, function () {
+            _this.getFlatCountriesList(_this.countries);
+        });
+    };
+    //Method to flat the countries list based on currencies.
+    AppComponent.prototype.getFlatCountriesList = function (countries) {
+        for (var i = 0; i < countries.length; i++) {
+            var country = {};
+            if (countries[i].currencies.length > 1) {
+                for (var j = 0; j < countries[i].currencies.length; j++) {
+                    if (countries[i].currencies[j].code != null && countries[i].currencies[j].code != '(none)') {
+                        country = {
+                            name: countries[i].name + ' - ' + countries[i].currencies[j].code,
+                            currencies: countries[i].currencies[j],
+                        };
+                        this.flatCountriesList.push(country);
+                    }
+                }
+            }
+            else {
+                country = {
+                    name: countries[i].name,
+                    currencies: countries[i].currencies[0]
+                };
+                this.flatCountriesList.push(country);
+            }
+        }
     };
     //Call a service method to invoke API call to get the FXRates
     AppComponent.prototype.getFXRate = function () {
@@ -98,10 +125,10 @@ var AppComponent = /** @class */ (function () {
     AppComponent.prototype.convertCurrency = function (operator) {
         //Check if the send, receive and fxRate are number
         if (this.rate && !isNaN(this.rate) && this.rate != null) {
-            if (operator === 1 && this.send != null && !isNaN(this.send)) {
+            if (operator === 1 && !isNaN(this.send)) {
                 this.receive = this.send * this.rate;
             }
-            else if (operator === 2 && this.receive != null && !isNaN(this.receive)) {
+            else if (operator === 2 && !isNaN(this.receive)) {
                 this.send = this.receive / this.rate;
             }
             else if (operator === 3) {
@@ -112,6 +139,16 @@ var AppComponent = /** @class */ (function () {
                     this.send = this.receive / this.rate;
                 }
             }
+        }
+        //Validating Min and Max on send input field.
+        if (this.send < 1 && this.send != null) {
+            this.sendErr = "Minimum amount must be 1";
+        }
+        else if (this.send > 5000) {
+            this.sendErr = "Maximum amount should not be greater than 5000";
+        }
+        else {
+            this.sendErr = "";
         }
     };
     //Method to compare Option values in Select
